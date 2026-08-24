@@ -52,7 +52,9 @@ h1{margin:0;font-family:"Playfair Display",serif;font-size:31px;line-height:1.12
 .btn:hover{transform:translateY(-2px);box-shadow:0 13px 28px rgba(0,0,0,.24)}
 .btn:active{transform:scale(.985)}
 .icon{width:21px;height:21px;display:block;flex:0 0 auto}
+.label-group{display:flex;flex-direction:column;align-items:flex-start;line-height:1.28;gap:1px}
 .label{font-size:15px;font-weight:700;letter-spacing:.025em}
+.count{font-size:10.5px;font-weight:600;letter-spacing:.03em;opacity:.72}
 .insta{background:linear-gradient(135deg,#d9a08d,#bd7f6c);color:#1b1110}
 .tiktok{background:#faf3eb;color:#1a1211}
 .fb{background:#302321;color:#faf3eb;border-color:rgba(230,180,163,.2)}
@@ -98,7 +100,10 @@ h1{margin:0;font-family:"Playfair Display",serif;font-size:31px;line-height:1.12
         <circle cx="12" cy="12" r="3.2" fill="none" stroke="#fff" stroke-width="1.6"/>
         <circle cx="17" cy="7" r="1.1" fill="#fff"/>
       </svg>
-      <span class="label">Follow us on Instagram</span>
+      <span class="label-group">
+        <span class="label">Follow us on Instagram</span>
+        <span class="count" data-count="instagram"></span>
+      </span>
     </a>
     <a class="btn tiktok" href="https://www.tiktok.com/@nooras_boutique_lk" target="_blank" rel="noopener noreferrer">
       <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -106,11 +111,17 @@ h1{margin:0;font-family:"Playfair Display",serif;font-size:31px;line-height:1.12
         <path d="M12.4 1h3.1c.17 1.42.83 2.75 1.85 3.75 1.02 1 2.34 1.62 3.75 1.75v3.13c-1.44-.03-2.86-.36-4.17-.98a8.4 8.4 0 0 1-1.54-.93v6.98c0 3.36-2.72 6.3-6.13 6.3A6.15 6.15 0 0 1 3.1 14.9a6.14 6.14 0 0 1 6.13-6.3c.34 0 .68.03 1 .09v3.2a3.1 3.1 0 0 0-1-.17 3.15 3.15 0 1 0 3.16 3.15V1Z" fill="#FE2C55" opacity=".75"/>
         <path d="M12.65 1h3.1c.17 1.42.83 2.75 1.85 3.75 1.02 1 2.34 1.62 3.75 1.75v3.13c-1.44-.03-2.86-.36-4.17-.98a8.4 8.4 0 0 1-1.54-.93v6.98c0 3.36-2.72 6.3-6.13 6.3A6.15 6.15 0 0 1 3.35 14.9a6.14 6.14 0 0 1 6.13-6.3c.34 0 .68.03 1 .09v3.2a3.1 3.1 0 0 0-1-.17 3.15 3.15 0 1 0 3.16 3.15V1Z" fill="#111"/>
       </svg>
-      <span class="label">Follow us on TikTok</span>
+      <span class="label-group">
+        <span class="label">Follow us on TikTok</span>
+        <span class="count" data-count="tiktok"></span>
+      </span>
     </a>
     <a class="btn fb" href="https://www.facebook.com/share/1DKhFWK9hD/" target="_blank" rel="noopener noreferrer">
       <svg class="icon icon-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="5" fill="#1877F2"/><path fill="#fff" d="M16.5 12.07h-2.1v6.86h-2.84v-6.86H10v-2.4h1.56V8.14c0-1.9 1.13-3.07 3.14-3.07.9 0 1.66.07 1.88.1v2.15h-1.29c-1.01 0-1.19.48-1.19 1.18v1.77h2.6l-.2 2.4Z"/></svg>
-      <span class="label">Follow us on Facebook</span>
+      <span class="label-group">
+        <span class="label">Follow us on Facebook</span>
+        <span class="count" data-count="facebook"></span>
+      </span>
     </a>
     <a class="btn google" href="https://share.google/PPs1QFxcszw5aIaF4" target="_blank" rel="noopener noreferrer">
       <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -131,5 +142,21 @@ h1{margin:0;font-family:"Playfair Display",serif;font-size:31px;line-height:1.12
   <div class="footer">Visit us at Siyana'z Dress Shop · Mawanella</div>
 </section>
 </main>
+<script src="counts.js"></script>
+<script>
+(function () {
+  var counts = window.NOORAS_COUNTS || {};
+  function formatCount(n) {
+    if (typeof n !== "number" || isNaN(n)) return "";
+    if (n >= 1000) return Math.floor(n / 1000) + "k+ followers";
+    return n + " followers";
+  }
+  document.querySelectorAll("[data-count]").forEach(function (el) {
+    var key = el.getAttribute("data-count");
+    var text = formatCount(counts[key]);
+    if (text) el.textContent = text;
+  });
+})();
+</script>
 </body>
 </html>
