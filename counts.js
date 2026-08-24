@@ -11,7 +11,7 @@
    ============================================================ */
 
 window.NOORAS_COUNTS = {
-  instagram: 12800,
+  instagram: 13000,
   tiktok: 25500,
   facebook: 30010
 };
