@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#171313">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="description" content="Nooras Boutique LK — Siyana'z Dress Shop, Mawanella. Follow us on Instagram, TikTok and Facebook or call us.">
 <title>Nooras Boutique LK | Siyana'z Dress Shop</title>
 <style>
@@ -143,20 +146,28 @@ h1{margin:0;font-family:"Playfair Display",serif;font-size:31px;line-height:1.12
   <div class="footer">Visit us at Siyana'z Dress Shop · Mawanella</div>
 </section>
 </main>
-<script src="counts.js"></script>
 <script>
 (function () {
-  var counts = window.NOORAS_COUNTS || {};
   function formatCount(n) {
     if (typeof n !== "number" || isNaN(n)) return "";
     if (n >= 1000) return Math.floor(n / 1000) + "k+ followers";
     return n + " followers";
   }
-  document.querySelectorAll("[data-count]").forEach(function (el) {
-    var key = el.getAttribute("data-count");
-    var text = formatCount(counts[key]);
-    if (text) el.textContent = text;
-  });
+  function applyCounts() {
+    var counts = window.NOORAS_COUNTS || {};
+    document.querySelectorAll("[data-count]").forEach(function (el) {
+      var key = el.getAttribute("data-count");
+      var text = formatCount(counts[key]);
+      if (text) el.textContent = text;
+    });
+  }
+  // Cache-bust counts.js: adding a changing value ("v=...") to the URL
+  // forces every visit to fetch the latest file instead of reusing an
+  // old cached copy, so repeat QR scans always show current numbers.
+  var s = document.createElement("script");
+  s.src = "counts.js?v=" + Date.now();
+  s.onload = applyCounts;
+  document.body.appendChild(s);
 })();
 </script>
 </body>
