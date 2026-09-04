@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#171313">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Nooras Boutique — Admin</title>
+<link rel="manifest" href="admin-manifest.json">
+<link rel="apple-touch-icon" href="admin-icon.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap');
+:root{
+  --bg:#171313; --bg2:#0f0d0d; --gold:#c9907b; --gold2:#e6b4a3;
+  --text:#f3e6dc; --muted:#a8988a; --card:#221c1a;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;background:radial-gradient(circle at 30% 0%, #241d1b, var(--bg2) 60%);
+  font-family:'DM Sans',sans-serif;color:var(--text);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.wrap{width:100%;max-width:480px}
+.title{font-family:'Playfair Display',serif;font-size:26px;text-align:center;margin-bottom:6px}
+.subtitle{text-align:center;color:var(--muted);font-size:13px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:32px}
+
+/* Login card */
+#loginCard{
+  background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:18px;
+  padding:28px 24px;box-shadow:0 20px 50px rgba(0,0,0,.35);
+}
+#loginCard input{
+  width:100%;padding:13px 14px;margin-bottom:12px;border-radius:10px;
+  border:1px solid rgba(255,255,255,.12);background:#171313;color:var(--text);font-size:15px;
+}
+#loginCard button{
+  width:100%;padding:13px;border-radius:10px;border:none;
+  background:linear-gradient(135deg,var(--gold),#b9705a);color:#1a1211;font-weight:700;font-size:15px;
+  cursor:pointer;transition:.15s ease;
+}
+#loginCard button:hover{transform:translateY(-1px)}
+#loginError{color:#e6897a;font-size:13px;margin-top:10px;text-align:center;min-height:16px}
+
+/* Dashboard */
+#dashboard{display:none}
+.card-row{display:flex;flex-direction:column;gap:14px;margin-bottom:24px}
+.stat-card{
+  background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:16px;
+  padding:18px 20px;display:flex;align-items:center;justify-content:space-between;
+}
+.stat-name{font-weight:700;font-size:15px}
+.stat-sub{color:var(--muted);font-size:12px;margin-top:2px}
+.stat-count{font-family:'Playfair Display',serif;font-size:30px;color:var(--gold2)}
+.bar-track{height:8px;border-radius:6px;background:#100d0c;margin-top:10px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:6px;transition:width .6s ease}
+.total-row{
+  display:flex;justify-content:space-between;padding:14px 4px 6px;color:var(--muted);
+  font-size:13px;border-top:1px solid rgba(255,255,255,.08);margin-top:6px;
+}
+#logoutBtn{
+  width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.15);
+  background:transparent;color:var(--muted);font-size:14px;cursor:pointer;margin-top:6px;
+}
+#refreshedAt{text-align:center;color:var(--muted);font-size:11px;margin-top:14px}
+.install-hint{
+  text-align:center;color:var(--muted);font-size:12px;margin-top:18px;line-height:1.6;
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="title">Nooras Boutique</div>
+  <div class="subtitle">Admin Panel</div>
+
+  <div id="loginCard">
+    <input type="email" id="email" placeholder="Admin email" autocomplete="username">
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+    <button id="loginBtn">Log In</button>
+    <div id="loginError"></div>
+  </div>
+
+  <div id="dashboard">
+    <div class="card-row" id="cardRow"></div>
+    <div class="total-row">
+      <span>Total clicks (all buttons)</span>
+      <span id="totalCount">0</span>
+    </div>
+    <button id="logoutBtn">Log Out</button>
+    <div id="refreshedAt"></div>
+    <div class="install-hint">Tip: use Chrome's "Install app" option (in the address bar or browser menu) to add this panel as a desktop/home-screen app.</div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBeg2J_nhuBG_hgcsocEinKyvOpH5-V2DI",
+    authDomain: "nooras-boutique-clicks.firebaseapp.com",
+    projectId: "nooras-boutique-clicks",
+    storageBucket: "nooras-boutique-clicks.firebasestorage.app",
+    messagingSenderId: "750864468612",
+    appId: "1:750864468612:web:34e92e632700a4b4b410d1"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const BUTTONS = [
+    { id: "instagram", label: "Instagram", sub: "Follow us button" },
+    { id: "tiktok",    label: "TikTok",    sub: "Follow us button" },
+    { id: "facebook",  label: "Facebook",  sub: "Follow us button" },
+    { id: "google",    label: "Google Review", sub: "Leave a review button" },
+    { id: "call",      label: "Call Us",   sub: "Phone button" }
+  ];
+
+  const loginCard = document.getElementById("loginCard");
+  const dashboard = document.getElementById("dashboard");
+  const loginError = document.getElementById("loginError");
+
+  document.getElementById("loginBtn").addEventListener("click", async () => {
+    loginError.textContent = "";
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (e) {
+      loginError.textContent = "Incorrect email or password.";
+    }
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      loginCard.style.display = "none";
+      dashboard.style.display = "block";
+      loadCounts();
+    } else {
+      loginCard.style.display = "block";
+      dashboard.style.display = "none";
+    }
+  });
+
+  async function loadCounts() {
+    const cardRow = document.getElementById("cardRow");
+    cardRow.innerHTML = "";
+    const results = [];
+
+    for (const btn of BUTTONS) {
+      let count = 0;
+      try {
+        const snap = await getDoc(doc(db, "clicks", btn.id));
+        if (snap.exists()) count = snap.data().count || 0;
+      } catch (e) {
+        console.warn("Failed to load", btn.id, e);
+      }
+      results.push({ ...btn, count });
+    }
+
+    const max = Math.max(1, ...results.map(r => r.count));
+    const total = results.reduce((sum, r) => sum + r.count, 0);
+
+    results.forEach(r => {
+      const pct = Math.round((r.count / max) * 100);
+      const card = document.createElement("div");
+      card.className = "stat-card";
+      card.style.flexDirection = "column";
+      card.style.alignItems = "stretch";
+      card.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+          <div>
+            <div class="stat-name">${r.label}</div>
+            <div class="stat-sub">${r.sub}</div>
+          </div>
+          <div class="stat-count">${r.count}</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+      `;
+      cardRow.appendChild(card);
+    });
+
+    document.getElementById("totalCount").textContent = total;
+    document.getElementById("refreshedAt").textContent =
+      "Last refreshed: " + new Date().toLocaleString();
+  }
+
+  // Register service worker for installability
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("admin-sw.js").catch(() => {});
+  }
+</script>
+</body>
+</html>

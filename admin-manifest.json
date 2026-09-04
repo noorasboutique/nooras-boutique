@@ -1,0 +1,12 @@
+{
+  "name": "Nooras Boutique Admin",
+  "short_name": "Nooras Admin",
+  "start_url": "./admin.html",
+  "display": "standalone",
+  "background_color": "#171313",
+  "theme_color": "#171313",
+  "icons": [
+    { "src": "admin-icon.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "admin-icon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
